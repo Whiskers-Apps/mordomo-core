@@ -164,6 +164,38 @@ impl OpenFile {
     }
 }
 
+impl OpenURL {
+    pub fn new<S: AsRef<str>>(url: S) -> Self {
+        Self {
+            url: url.as_ref().to_string(),
+        }
+    }
+}
+
+impl CopyText {
+    pub fn new<S: AsRef<str>>(text: S) -> Self {
+        Self {
+            text: text.as_ref().to_string(),
+        }
+    }
+}
+
+impl CopyImage {
+    pub fn new<P: AsRef<Path>>(path: P) -> Self {
+        Self {
+            image_path: path.as_ref().to_path_buf(),
+        }
+    }
+}
+
+impl ShowEntries {
+    pub fn new(entries: &[Entry]) -> Self {
+        Self {
+            entries: entries.to_vec(),
+        }
+    }
+}
+
 impl RunOnPlugin {
     pub fn new<S: AsRef<str>>(plugin_id: S, action: S) -> Self {
         Self {
@@ -173,7 +205,7 @@ impl RunOnPlugin {
         }
     }
 
-    pub fn add_custom_info<S: AsRef<String>>(&mut self, info: S) -> Self {
+    pub fn add_custom_info<S: AsRef<str>>(&mut self, info: S) -> Self {
         self.custom_info = if let Some(mut custom_info) = self.custom_info.clone() {
             custom_info.push(info.as_ref().to_string());
             Some(custom_info)
