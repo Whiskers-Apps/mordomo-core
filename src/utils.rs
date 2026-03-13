@@ -1,6 +1,11 @@
 #![allow(dead_code)]
 
-use std::{env, error::Error, path::PathBuf, process::Command};
+use std::{
+    env,
+    error::Error,
+    path::{Path, PathBuf},
+    process::{Command, Stdio},
+};
 
 #[derive(Debug, Clone)]
 pub struct KeywordSplit {
@@ -59,6 +64,37 @@ pub fn send_notification<S: AsRef<str>>(title: S, text: S) -> Result<(), Box<dyn
             text.as_ref(),
         ])
         .spawn()?;
+
+    Ok(())
+}
+
+pub fn copy_text<S: AsRef<str>>(text: S) -> Result<(), Box<dyn Error>> {
+    let text = text.as_ref().to_owned();
+
+    tokio::spawn(async move {
+        let text_blocks: Vec<&str> = text.split(" ").collect();
+
+        Command::new("wl-copy")
+            .args(text_blocks)
+            .spawn()
+            .expect("Error copying to clipboard");
+    });
+
+    Ok(())
+}
+
+pub fn copy_image<P: AsRef<Path>>(path: P) -> Result<(), Box<dyn Error>> {
+    let path = path.as_ref().to_owned();
+
+    tokio::spawn(async move {
+        Command::new("cat")
+            .arg(format!("'{}'", path.display()))
+            .args(["|", "wl-copy", "-t", "image/png"])
+            .stdout(Stdio::piped())
+            .stdin(Stdio::piped())
+            .spawn()
+            .expect("Error copying image")
+    });
 
     Ok(())
 }

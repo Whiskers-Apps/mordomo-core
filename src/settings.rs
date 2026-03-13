@@ -1,4 +1,4 @@
-use std::{error::Error, fs};
+use std::{error::Error, fs, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 
@@ -9,6 +9,7 @@ pub struct Settings {
     pub height: u16,
     pub theme: Theme,
     pub keywords: Vec<Keyword>,
+    pub plugins: Vec<PluginSetting>,
     pub search_engines: Vec<SearchEngine>,
 }
 
@@ -31,6 +32,13 @@ pub struct Keyword {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PluginSetting {
+    pub plugin_id: String,
+    pub setting_id: String,
+    pub value: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SearchEngine {
     pub id: u16,
     pub keyword: String,
@@ -45,6 +53,7 @@ impl Default for Settings {
             height: 400,
             theme: Theme::default(),
             keywords: vec![],
+            plugins: vec![],
             search_engines: vec![
                 SearchEngine {
                     id: 0,
@@ -77,6 +86,36 @@ impl Default for Theme {
     }
 }
 
+impl Settings {
+    pub fn get() -> Result<Settings, Box<dyn Error>> {
+        let json = fs::read(Settings::get_path()?)?;
+        let settings = serde_json::from_slice(&json)?;
+
+        Ok(settings)
+    }
+
+    pub fn save(self: &Self) -> Result<(), Box<dyn Error>> {
+        let json = serde_json::to_string_pretty(self)?;
+        fs::write(Settings::get_path()?, &json)?;
+        Ok(())
+    }
+
+    pub fn get_path() -> Result<PathBuf, Box<dyn Error>> {
+        let mut settings_path =
+            dirs::config_dir().ok_or_else(|| String::from("Failed to get config dir"))?;
+
+        settings_path.push("mordomo");
+
+        if !settings_path.exists() {
+            fs::create_dir_all(&settings_path)?;
+        }
+
+        settings_path.push("settings.json");
+
+        Ok(settings_path)
+    }
+}
+
 // --------------------------------------------------------------- //
 
 pub fn is_dark_theme() -> Result<bool, Box<dyn Error>> {
@@ -89,4 +128,42 @@ pub fn is_dark_theme() -> Result<bool, Box<dyn Error>> {
     let user_settings: Settings = serde_json::from_slice(&json)?;
 
     Ok(user_settings.theme.dark)
+}
+
+pub fn get_plugin_setting<S: AsRef<str>>(
+    plugin_id: S,
+    setting_id: S,
+) -> Result<String, Box<dyn Error>> {
+    let plugin_id = plugin_id.as_ref();
+    let setting_id = setting_id.as_ref();
+
+    if let Some(setting) = Settings::get()?
+        .plugins
+        .into_iter()
+        .find(|p| p.plugin_id == plugin_id && p.setting_id == setting_id)
+    {
+        return Ok(setting.value);
+    }
+
+    Err("Could not find setting".into())
+}
+
+pub fn get_plugin_usize_setting<S: AsRef<str>>(
+    plugin_id: S,
+    setting_id: S,
+) -> Result<usize, Box<dyn Error>> {
+    Ok(get_plugin_setting(plugin_id.as_ref(), setting_id.as_ref())?.parse::<usize>()?)
+}
+
+pub fn get_plugin_bool_setting<S: AsRef<str>>(
+    plugin_id: S,
+    setting_id: S,
+) -> Result<bool, Box<dyn Error>> {
+    let setting = get_plugin_setting(plugin_id.as_ref(), setting_id.as_ref())?;
+
+    match setting.as_str() {
+        "true" => Ok(true),
+        "false" => Ok(false),
+        _ => Err("Setting is not a boolean".into()),
+    }
 }
