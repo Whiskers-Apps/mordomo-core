@@ -42,7 +42,9 @@ where
                     }
                 }
                 PluginMessage::RunCustomAction(action_message) => {
-                    on_action(action_message);
+                    if action_message.plugin_id == id {
+                        on_action(action_message);
+                    }
                 }
             }
         }

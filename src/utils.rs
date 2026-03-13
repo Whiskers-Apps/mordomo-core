@@ -5,6 +5,7 @@ use std::{
     error::Error,
     path::{Path, PathBuf},
     process::{Command, Stdio},
+    thread,
 };
 
 #[derive(Debug, Clone)]
@@ -71,7 +72,7 @@ pub fn send_notification<S: AsRef<str>>(title: S, text: S) -> Result<(), Box<dyn
 pub fn copy_text<S: AsRef<str>>(text: S) -> Result<(), Box<dyn Error>> {
     let text = text.as_ref().to_owned();
 
-    tokio::spawn(async move {
+    thread::spawn(move || {
         let text_blocks: Vec<&str> = text.split(" ").collect();
 
         Command::new("wl-copy")
@@ -86,7 +87,7 @@ pub fn copy_text<S: AsRef<str>>(text: S) -> Result<(), Box<dyn Error>> {
 pub fn copy_image<P: AsRef<Path>>(path: P) -> Result<(), Box<dyn Error>> {
     let path = path.as_ref().to_owned();
 
-    tokio::spawn(async move {
+    thread::spawn(move || {
         Command::new("cat")
             .arg(format!("'{}'", path.display()))
             .args(["|", "wl-copy", "-t", "image/png"])
