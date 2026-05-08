@@ -6,16 +6,20 @@ use tokio::{
     net::TcpStream,
 };
 
-use crate::core::{Entry, GetEntriesMessage, PluginMessage, RunCustomActionMessage};
+use crate::core::{
+    Entry, FormSubmittedMessage, GetEntriesMessage, PluginMessage, RunCustomActionMessage,
+};
 
 pub async fn handle_plugin_messages<F, A>(
     id: &str,
     on_message: F,
     on_action: A,
+    on_form_submitted: F,
 ) -> Result<(), Box<dyn Error>>
 where
     F: Fn(GetEntriesMessage) -> Vec<Entry>,
     A: Fn(RunCustomActionMessage),
+    F: Fn(FormSubmittedMessage),
 {
     let args: Vec<String> = env::args().collect();
     let port = args.get(1).expect("Failed to get port");
@@ -44,6 +48,11 @@ where
                 PluginMessage::RunCustomAction(action_message) => {
                     if action_message.plugin_id == id {
                         on_action(action_message);
+                    }
+                }
+                PluginMessage::FormSubmitted(form_submitted_message) => {
+                    if form_submitted_message.plugin_id == id {
+                        on_form_submitted(form_submitted_message);
                     }
                 }
             }

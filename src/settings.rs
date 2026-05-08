@@ -1,5 +1,6 @@
 use std::{error::Error, fs, path::PathBuf};
 
+use dirs::cache_dir;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -11,6 +12,7 @@ pub struct Settings {
     pub keywords: Vec<Keyword>,
     pub plugins: Vec<PluginSetting>,
     pub search_engines: Vec<SearchEngine>,
+    pub default_engine: Option<u16>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -67,7 +69,14 @@ impl Default for Settings {
                     name: String::from("DuckDuckGo"),
                     query: String::from("https://duckduckgo.com/?q=%s"),
                 },
+                SearchEngine {
+                    id: 2,
+                    keyword: String::from("g"),
+                    name: String::from("Google"),
+                    query: String::from("https://www.google.com/search?q=%s"),
+                },
             ],
+            default_engine: Some(2),
         }
     }
 }
@@ -113,6 +122,18 @@ impl Settings {
         settings_path.push("settings.json");
 
         Ok(settings_path)
+    }
+}
+
+impl SearchEngine {
+    pub fn get_icon(&self) -> Result<PathBuf, Box<dyn Error>> {
+        let path = cache_dir()
+            .ok_or_else(|| "Failed to get cache dir")?
+            .join("mordomo")
+            .join("search-engine-icons")
+            .join(self.id.to_string());
+
+        Ok(path)
     }
 }
 
