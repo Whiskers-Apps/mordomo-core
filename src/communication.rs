@@ -10,14 +10,14 @@ use crate::core::{
     Entry, FormSubmittedMessage, GetEntriesMessage, PluginMessage, RunCustomActionMessage,
 };
 
-pub async fn handle_plugin_messages<F, A>(
+pub async fn handle_plugin_messages<E, A, F>(
     id: &str,
-    on_message: F,
+    on_message: E,
     on_action: A,
     on_form_submitted: F,
 ) -> Result<(), Box<dyn Error>>
 where
-    F: Fn(GetEntriesMessage) -> Vec<Entry>,
+    E: Fn(GetEntriesMessage) -> Vec<Entry>,
     A: Fn(RunCustomActionMessage),
     F: Fn(FormSubmittedMessage),
 {
