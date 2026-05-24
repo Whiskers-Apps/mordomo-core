@@ -3,7 +3,7 @@ use std::{error::Error, fs, path::PathBuf};
 use dirs::cache_dir;
 use serde::{Deserialize, Serialize};
 
-use crate::plugins::{PluginInfo, get_plugins};
+use crate::plugins::get_plugins;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(default)]
@@ -166,38 +166,38 @@ pub fn get_plugin_setting<S: AsRef<str>>(
         .find(|p| p.plugin_id == plugin_id && p.setting_id == setting_id)
     {
         return Ok(setting.value);
-    } else {
-        if let Some(plugin) = get_plugins()?.iter().find(|p| p.id == plugin_id) {
-            if let Some(settings) = plugin.settings.to_owned() {
-                if let Some(setting) = settings.iter().find(|s| match s {
+    }
+
+    println!("{:?}", get_plugins());
+
+    if let Some(plugin) = get_plugins()?.iter().find(|p| p.id == plugin_id) {
+        if let Some(settings) = plugin.settings.to_owned() {
+            if let Some(setting) = settings.iter().find(|s| match s {
+                crate::plugins::PluginSetting::Text(text_setting) => text_setting.id == setting_id,
+                crate::plugins::PluginSetting::Number(number_setting) => {
+                    number_setting.id == setting_id
+                }
+                crate::plugins::PluginSetting::Select(select_setting) => {
+                    select_setting.id == setting_id
+                }
+                crate::plugins::PluginSetting::Check(check_setting) => {
+                    check_setting.id == setting_id
+                }
+            }) {
+                return Ok(match setting {
                     crate::plugins::PluginSetting::Text(text_setting) => {
-                        text_setting.id == setting_id
+                        text_setting.default_value.to_owned()
                     }
                     crate::plugins::PluginSetting::Number(number_setting) => {
-                        number_setting.id == setting_id
+                        number_setting.default_value.to_string()
                     }
                     crate::plugins::PluginSetting::Select(select_setting) => {
-                        select_setting.id == setting_id
+                        select_setting.default_value.to_owned()
                     }
                     crate::plugins::PluginSetting::Check(check_setting) => {
-                        check_setting.id == setting_id
+                        check_setting.default_value.to_string()
                     }
-                }) {
-                    return Ok(match setting {
-                        crate::plugins::PluginSetting::Text(text_setting) => {
-                            text_setting.default_value.to_owned()
-                        }
-                        crate::plugins::PluginSetting::Number(number_setting) => {
-                            number_setting.default_value.to_string()
-                        }
-                        crate::plugins::PluginSetting::Select(select_setting) => {
-                            select_setting.default_value.to_owned()
-                        }
-                        crate::plugins::PluginSetting::Check(check_setting) => {
-                            check_setting.default_value.to_string()
-                        }
-                    });
-                }
+                });
             }
         }
     }

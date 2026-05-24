@@ -1,4 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::{
+    error::Error,
+    path::{Path, PathBuf},
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -521,5 +524,90 @@ impl PathEntry {
             Some(vec![info])
         };
         self.clone()
+    }
+}
+
+pub trait FormSubmission {
+    fn get_text_result(&self, id: &str) -> Result<TextFormResult, Box<dyn Error>>;
+    fn get_number_result(&self, id: &str) -> Result<NumberFormResult, Box<dyn Error>>;
+    fn get_check_result(&self, id: &str) -> Result<CheckFormResult, Box<dyn Error>>;
+    fn get_path_result(&self, id: &str) -> Result<PathFormResult, Box<dyn Error>>;
+    fn get_select_result(&self, id: &str) -> Result<SelectFormResult, Box<dyn Error>>;
+}
+
+impl FormSubmission for Vec<FormResult> {
+    fn get_text_result(&self, id: &str) -> Result<TextFormResult, Box<dyn Error>> {
+        for result in self {
+            match result {
+                FormResult::TextFormResult(text_form_result) => {
+                    if text_form_result.id == id {
+                        return Ok(text_form_result.to_owned());
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        return Err("Text Result not found".into());
+    }
+
+    fn get_number_result(&self, id: &str) -> Result<NumberFormResult, Box<dyn Error>> {
+        for result in self {
+            match result {
+                FormResult::NumberFormResult(number_form_result) => {
+                    if number_form_result.id == id {
+                        return Ok(number_form_result.to_owned());
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        return Err("Number Result not found".into());
+    }
+
+    fn get_check_result(&self, id: &str) -> Result<CheckFormResult, Box<dyn Error>> {
+        for result in self {
+            match result {
+                FormResult::CheckFormResult(check_form_result) => {
+                    if check_form_result.id == id {
+                        return Ok(check_form_result.to_owned());
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        return Err("Check Result not found".into());
+    }
+
+    fn get_path_result(&self, id: &str) -> Result<PathFormResult, Box<dyn Error>> {
+        for result in self {
+            match result {
+                FormResult::PathFormResult(path_form_result) => {
+                    if path_form_result.id == id {
+                        return Ok(path_form_result.to_owned());
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        return Err("Path Result not found".into());
+    }
+
+    fn get_select_result(&self, id: &str) -> Result<SelectFormResult, Box<dyn Error>> {
+        for result in self {
+            match result {
+                FormResult::SelectFormResult(select_form_result) => {
+                    if select_form_result.id == id {
+                        return Ok(select_form_result.to_owned());
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        return Err("Select Result not found".into());
     }
 }
