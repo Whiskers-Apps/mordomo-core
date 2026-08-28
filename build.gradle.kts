@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "org.whiskersapps"
-version = "0.1.1"
+version = "0.2.0"
 
 repositories {
     mavenCentral()
@@ -15,6 +15,7 @@ dependencies {
     testImplementation(kotlin("test"))
 
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.core)
 }
 
 kotlin {
