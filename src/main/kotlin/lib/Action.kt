@@ -37,8 +37,8 @@ data class ShowEntries(
 
 @Serializable
 data class Plugin(
-    val text: String,
+    val text: String = "",
     val pluginId: String,
     val action: String,
-    val customInfo: List<String>
+    val customInfo: List<String> = emptyList()
 ) : Action
