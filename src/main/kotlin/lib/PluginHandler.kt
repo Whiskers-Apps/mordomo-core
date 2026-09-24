@@ -18,6 +18,8 @@ class PluginHandler(val pluginId: String) {
     lateinit var transmitter: PrintWriter
     lateinit var receiver: BufferedReader
 
+    private val jsonConf = Json { ignoreUnknownKeys = true }
+
     suspend fun connect() = withContext(Dispatchers.IO) {
         val socketFile = File("/tmp/mordomo.port")
 
@@ -46,7 +48,7 @@ class PluginHandler(val pluginId: String) {
                 val path = File(configDir, "settings.json")
 
                 val jsonContent = path.readText()
-                val settings: Settings = Json.decodeFromString(jsonContent)
+                val settings: Settings = jsonConf.decodeFromString(jsonContent)
 
                 settings.pluginsSettings[pluginId]?.forEach { (settingId, settingsValue) ->
                     pluginSettings[settingId] = settingsValue
@@ -72,7 +74,7 @@ class PluginHandler(val pluginId: String) {
                         if (changedFile.toString() != "settings.json") continue
 
                         val jsonContent = path.readText()
-                        val settings: Settings = Json.decodeFromString(jsonContent)
+                        val settings: Settings = jsonConf.decodeFromString(jsonContent)
 
                         settings.pluginsSettings[pluginId]?.forEach { (settingId, settingsValue) ->
                             pluginSettings[settingId] = settingsValue
