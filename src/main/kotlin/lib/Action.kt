@@ -45,6 +45,7 @@ data class Plugin(
 
 @Serializable
 data class Form(
+    val text: String = "",
     val pluginId: String,
     val title: String,
     val buttonText: String,
