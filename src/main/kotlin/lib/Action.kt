@@ -104,7 +104,7 @@ data class PathInput(
     val id: String,
     val title: String,
     val description: String,
-    val value: Boolean,
+    val value: Boolean? = null,
     val selectFolder: Boolean,
     val fileExtensions: List<String>,
     val customInfo: List<String> = emptyList()
