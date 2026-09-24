@@ -104,8 +104,8 @@ data class PathInput(
     val id: String,
     val title: String,
     val description: String,
-    val value: Boolean? = null,
-    val selectFolder: Boolean,
-    val fileExtensions: List<String>,
+    val value: String? = null,
+    val selectFolder: Boolean = false,
+    val fileExtensions: List<String> = emptyList(),
     val customInfo: List<String> = emptyList()
 ): FormInput
