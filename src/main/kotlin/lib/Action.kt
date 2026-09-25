@@ -7,42 +7,36 @@ sealed interface Action
 
 @Serializable
 data class OpenApp(
-    val text: String,
     val path: String,
     val confirm: Boolean = false,
 ) : Action
 
 @Serializable
 data class OpenUrl(
-    val text: String,
     val url: String,
     val confirm: Boolean = false,
 ) : Action
 
 @Serializable
 data class CopyText(
-    val text: String,
     val textCopy: String,
     val confirm: Boolean = false,
 ) : Action
 
 @Serializable
 data class CopyImage(
-    val text: String,
     val path: String,
     val confirm: Boolean = false,
 ) : Action
 
 @Serializable
 data class ShowEntries(
-    val text: String,
     val entries: List<Entry>,
     val confirm: Boolean = false,
 ) : Action
 
 @Serializable
 data class Plugin(
-    val text: String = "",
     val pluginId: String,
     val action: String,
     val customInfo: List<String> = emptyList(),
@@ -51,7 +45,6 @@ data class Plugin(
 
 @Serializable
 data class Form(
-    val text: String = "",
     val pluginId: String,
     val title: String,
     val buttonText: String,
