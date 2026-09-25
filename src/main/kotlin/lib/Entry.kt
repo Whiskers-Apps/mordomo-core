@@ -7,5 +7,5 @@ data class Entry(
     val image: String? = null,
     val title: String,
     val description: String? = null,
-    val actions: Action
+    val action: Action
 )
