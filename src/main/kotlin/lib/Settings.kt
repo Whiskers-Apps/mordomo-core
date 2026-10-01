@@ -36,6 +36,22 @@ data class Settings(
             keyword = "!s"
         )
     ),
+    val theme: Theme = Theme()
+)
+
+@Serializable
+data class Theme(
+    val dark: Boolean = false,
+    val main: String = "#F6F6F6",
+    val secondary: String = "#EBEBEB",
+    val tertiary: String = "#D8D8D8",
+    val textMain: String = "#000000",
+    val textSecondary: String = "#1A1A1A",
+    val textDisabled: String = "#606060",
+    val accent: String = "#9A7100",
+    val onAccent: String = "#FFFFFF",
+    val danger: String = "#9A0000",
+    val onDanger: String = "#FFFFFF",
 )
 
 @Serializable

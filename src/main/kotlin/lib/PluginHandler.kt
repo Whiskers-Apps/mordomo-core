@@ -13,6 +13,7 @@ import java.net.Socket
 import java.nio.file.FileSystems
 import java.nio.file.Path
 import java.nio.file.StandardWatchEventKinds
+import kotlin.system.exitProcess
 
 class PluginHandler(val pluginId: String) {
     lateinit var transmitter: PrintWriter
@@ -36,11 +37,12 @@ class PluginHandler(val pluginId: String) {
         transmitter.println("ack $pluginId")
     }
 
-    suspend fun listen(onMessageReceived: suspend (PluginMessage, Map<String, String>) -> Unit) =
+    suspend fun listen(onMessageReceived: suspend (PluginMessage, Map<String, String>, darkMode: Boolean) -> Unit) =
         withContext(Dispatchers.IO) {
             connect()
 
             val pluginSettings: MutableMap<String, String> = mutableMapOf()
+            var darkMode = false
 
             launch {
                 val watchService = FileSystems.getDefault().newWatchService()
@@ -49,6 +51,8 @@ class PluginHandler(val pluginId: String) {
 
                 val jsonContent = path.readText()
                 val settings: Settings = jsonConf.decodeFromString(jsonContent)
+
+                darkMode = settings.theme.dark
 
                 settings.pluginsSettings[pluginId]?.forEach { (settingId, settingsValue) ->
                     pluginSettings[settingId] = settingsValue
@@ -88,10 +92,14 @@ class PluginHandler(val pluginId: String) {
             while (true) {
                 try {
                     val message = receiver.readLine() ?: break
+
+                    if (message == "kill")
+                        exitProcess(0)
+
                     val pluginMessage: PluginMessage = Json.decodeFromString(message)
 
                     launch {
-                        onMessageReceived(pluginMessage, pluginSettings)
+                        onMessageReceived(pluginMessage, pluginSettings, darkMode)
                     }
                 } catch (_: Exception) {
                     break
