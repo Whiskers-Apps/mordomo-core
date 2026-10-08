@@ -5,7 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Settings(
-    val showFooter: Boolean = true,
     /// Map<PluginId, Map<SettingId, Value>>
     val pluginsSettings: Map<String, Map<String, String>> = emptyMap(),
     val searchKeyword: String? = "s",
@@ -36,7 +35,9 @@ data class Settings(
             keyword = "!s"
         )
     ),
-    val theme: Theme = Theme()
+    val theme: Theme = Theme(),
+    val hideFooter: Boolean = false,
+    val drawBorder: Boolean = false,
 )
 
 @Serializable
