@@ -18,8 +18,13 @@ import kotlin.system.exitProcess
 class PluginHandler(val pluginId: String) {
     lateinit var transmitter: PrintWriter
     lateinit var receiver: BufferedReader
+    lateinit var socket: Socket
 
-    private val jsonConf = Json { ignoreUnknownKeys = true }
+    private val jsonConf = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+        ignoreUnknownKeys = true
+    }
 
     suspend fun connect() = withContext(Dispatchers.IO) {
         val socketFile = File("/tmp/mordomo.port")
@@ -29,7 +34,7 @@ class PluginHandler(val pluginId: String) {
 
         val port = socketFile.readText().toIntOrNull() ?: return@withContext
 
-        val socket = Socket("localhost", port)
+        socket = Socket("localhost", port)
 
         transmitter = PrintWriter(socket.getOutputStream(), true)
         receiver = BufferedReader(InputStreamReader(socket.getInputStream()))
@@ -93,10 +98,15 @@ class PluginHandler(val pluginId: String) {
                 try {
                     val message = receiver.readLine() ?: break
 
-                    if (message == "kill")
-                        exitProcess(0)
+                    if (message == "kill"){
+                        receiver.close()
+                        transmitter.close()
+                        socket.close()
 
-                    val pluginMessage: PluginMessage = Json.decodeFromString(message)
+                        exitProcess(0)
+                    }
+
+                    val pluginMessage: PluginMessage = jsonConf.decodeFromString(message)
 
                     launch {
                         onMessageReceived(pluginMessage, pluginSettings, darkMode)
